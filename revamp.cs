@@ -25,6 +25,7 @@ using Sandbox.Game;
 using Sandbox.Game.GameSystems;
 using Sandbox.Game.Weapons;
 using System.ComponentModel;
+//using SpaceEngineers.Game.ModAPI.Ingame;
 
 namespace dolboeb
 {
@@ -74,65 +75,52 @@ namespace dolboeb
 
 		// --- конец стенки
 
-		// формула = (Кол-во патронов X Время стрельбы)/Кол-во пушек
+
+		// код проходит две(три(3)) стадии: 1-сделать его рабочим, 2-сделать его удобным, 3-автоматизировать
 
 		// ^ удалить до публикации
+
+		// формула = (Кол-во патронов X Время стрельбы)/Кол-во пушек
 
 		// ...UNICODE1...
 
 		string AmmoInventory = "[Cargo-Ammo]"; // Название инвентаря, в котором должны быть патроны для распределения | Name of inventory for ammo sorting
-		string GunsDisplay = "[LCD-Ammo-Guns]"; // Название LCD дисплея с информацией о пушках | Name of LCD display for guns info
-		string AmmoDisplay = "[LCD-Ammo-Ammo]"; // Название LCD дисплея с информацией о патронах в инвентаре | Name of LCD display for ammo info in inventory
-		int ShootTime = 1; // Время стрельбы (в минутах) | Time of shooting (in minutes)
+		//int ShootTime = 1; // Время стрельбы (в минутах) | Time of shooting (in minutes)
 
 
+		public class YoGun // yo mama
+		{
+			public string Name = "", Id = "";
+			public int Count = 0;
+		}
 
-
-		List<IMyTerminalBlock> Gats = new List<IMyTerminalBlock>(); // guns
-		List<IMyLargeMissileTurret> Arts = new List<IMyLargeMissileTurret>();
 
 		private void GetTurrets()
 		{
-			GridTerminalSystem.GetBlocksOfType<IMyLargeGatlingTurret>(Gats, block => !block.CubeGrid.IsSameConstructAs(Me.CubeGrid));
-			foreach (var block in Gats) { var g = block.GetInventory(); MoveAmmoBlyat(g); }
+            List<IMyLargeGatlingTurret> Gats = new List<IMyLargeGatlingTurret>();
+			List<IMyLargeMissileTurret> Arts = new List<IMyLargeMissileTurret>();
+
+
+
+			GridTerminalSystem.GetBlocksOfType(Gats);
 			GridTerminalSystem.GetBlocksOfType(Arts, block => !block.CubeGrid.IsSameConstructAs(Me.CubeGrid));
+			
+			foreach(var b in Gats)
+            {
+                MoveAmmo(b.GetInventory());
+            }
 
 
-		}
+        }
 
-		private void SetLCD()
-		{
-			var GunsLCD = (IMyTextPanel)GridTerminalSystem.GetBlockWithName(GunsDisplay);
-			var AmmoLCD = (IMyTextPanel)GridTerminalSystem.GetBlockWithName(AmmoDisplay);
-			var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
-
-			Echo("Я ЗАЕБАЛСЯ ДЕЛАТЬ ЭТУ ХУЙНЮ");
-
-			// AMMO LCD
-			AmmoLCD.WriteText(Convert.ToString(
-			$"{Container.DisplayNameText} - inventory\n\n"));
-
-
-			// GUNS LCD
-			GunsLCD.WriteText(Convert.ToString(
-			$"{ShootTime} min - time of shooting\n" +
-			"Script searches for guns ONLY on Subgrids \n(connected via Connector)\n" +
-			"AMOUNT | NAME \n\n" +
-
-			$"{Gats.Count} | Gatling turrets\n" +
-			$"{Arts.Count} | Artillery turrets\n"));
-
-
-		}
-
-		private void MoveAmmoBlyat(IMyInventory dest)
+        private void MoveAmmo(IMyInventory dest)
 		{
 			var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
 
 			MoveInventory(Container.GetInventory(), dest);
 		}
 
-		private static void MoveInventory(IMyInventory src, IMyInventory dest)
+		private void MoveInventory(IMyInventory src, IMyInventory dest)
 		{
 			for (int i = 0; i < src.ItemCount; i++)
 			{
@@ -143,8 +131,8 @@ namespace dolboeb
 				{
 					src.TransferItemTo(dest, item.Value, null);
 				}
-			}
-		}
+            }
+        }
 
 		private void Main()
 		{
@@ -168,7 +156,7 @@ namespace dolboeb
 			// Echo("LCD: " LCDstate +); // доделать интерфейс внутри самого блока 
 
 			GetTurrets();
-			SetLCD();
+
 
 
 		}
