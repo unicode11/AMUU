@@ -97,7 +97,7 @@ namespace dolboeb
 
 		private void GetTurrets()
 		{
-            List<IMyLargeGatlingTurret> Gats = new List<IMyLargeGatlingTurret>();
+			List<IMyLargeGatlingTurret> Gats = new List<IMyLargeGatlingTurret>();
 			List<IMyLargeMissileTurret> Arts = new List<IMyLargeMissileTurret>();
 
 
@@ -106,14 +106,14 @@ namespace dolboeb
 			GridTerminalSystem.GetBlocksOfType(Arts, block => !block.CubeGrid.IsSameConstructAs(Me.CubeGrid));
 			
 			foreach(var b in Gats)
-            {
-                MoveAmmo(b.GetInventory());
-            }
+			{
+				MoveAmmo(b.GetInventory());
+			}
 
 
-        }
+		}
 
-        private void MoveAmmo(IMyInventory dest)
+		private void MoveAmmo(IMyInventory dest)
 		{
 			var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
 
@@ -131,8 +131,8 @@ namespace dolboeb
 				{
 					src.TransferItemTo(dest, item.Value, null);
 				}
-            }
-        }
+			}
+		}
 
 		private void Main()
 		{
