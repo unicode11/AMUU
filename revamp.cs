@@ -82,10 +82,12 @@ namespace dolboeb
 
 		// формула = (Кол-во патронов X Время стрельбы)/Кол-во пушек
 
+		// ИНВЕНТАРЬ НЕ ПЕРЕДАЕТ ЕСЛИ ОН ПЕРЕЗАПОЛНЯЕТ
+
 		// ...UNICODE1...
 
 		string AmmoInventory = "[Cargo-Ammo]"; // Название инвентаря, в котором должны быть патроны для распределения | Name of inventory for ammo sorting
-		//int ShootTime = 1; // Время стрельбы (в минутах) | Time of shooting (in minutes)
+		int ShootTime = 1; // Время стрельбы (в минутах) | Time of shooting (in minutes)
 
 
 		public class YoGun // yo mama
@@ -98,38 +100,40 @@ namespace dolboeb
 		private void GetTurrets()
 		{
 			List<IMyLargeGatlingTurret> Gats = new List<IMyLargeGatlingTurret>();
-			List<IMyLargeMissileTurret> Arts = new List<IMyLargeMissileTurret>();
+            var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
 
 
 
-			GridTerminalSystem.GetBlocksOfType(Gats);
-			GridTerminalSystem.GetBlocksOfType(Arts, block => !block.CubeGrid.IsSameConstructAs(Me.CubeGrid));
-			
-			foreach(var b in Gats)
+            GridTerminalSystem.GetBlocksOfType(Gats);
+
+			foreach (var b in Gats)
 			{
-				MoveAmmo(b.GetInventory());
-			}
+				var inventory = b.GetInventory();
+				if (inventory.GetItemAt(0) != null) continue;
+				{ MoveInventory(Container.GetInventory(), inventory, ShootTime); }
+            }
+
 
 
 		}
 
-		private void MoveAmmo(IMyInventory dest)
-		{
-			var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
+		//private void MoveAmmo(IMyInventory dest, int amount)
+		//{
+		//	var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
 
-			MoveInventory(Container.GetInventory(), dest);
-		}
+		//	MoveInventory(Container.GetInventory(), dest, amount);
 
-		private void MoveInventory(IMyInventory src, IMyInventory dest)
+		//}
+
+        private static void MoveInventory(IMyInventory src, IMyInventory dest, int amount)
 		{
 			for (int i = 0; i < src.ItemCount; i++)
 			{
 				var item = src.GetItemAt(i);
-				if (!item.HasValue) continue;
-				// the destination actually has space...
-				if (dest.CanItemsBeAdded(item.Value.Amount, item.Value.Type))
+                if (!item.HasValue) continue;
+                if (dest.CanItemsBeAdded(item.Value.Amount, item.Value.Type))
 				{
-					src.TransferItemTo(dest, item.Value, null);
+					src.TransferItemTo(dest, item.Value, amount);
 				}
 			}
 		}
@@ -157,9 +161,8 @@ namespace dolboeb
 
 			GetTurrets();
 
-
+			Echo("Done");
 
 		}
-
 	}
 }
