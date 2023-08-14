@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text;
 using System.Collections;
@@ -25,6 +25,9 @@ using Sandbox.Game;
 using Sandbox.Game.GameSystems;
 using Sandbox.Game.Weapons;
 using System.ComponentModel;
+using System.Net;
+using Sandbox.Definitions;
+//using Sandbox.ModAPI;
 //using SpaceEngineers.Game.ModAPI.Ingame;
 
 namespace dolboeb
@@ -78,88 +81,166 @@ namespace dolboeb
 
 		// код проходит две(три(3)) стадии: 1-сделать его рабочим, 2-сделать его удобным, 3-автоматизировать
 
+		// формула = (Кол-во патронов X Время стрельбы)/Кол-во пушек
+		// возможно кол-во патронов не нужно? и тогда будет Время стрельбы x rate of fire
+
+		// ИНВЕНТАРЬ НЕ ПЕРЕДАЕТ ЕСЛИ ОН ПЕРЕЗАПОЛНЯЕТ
+
 		// ^ удалить до публикации
 
-		// формула = (Кол-во патронов X Время стрельбы)/Кол-во пушек
 
 		// ...UNICODE1...
 
-		string AmmoInventory = "[Cargo-Ammo]"; // Название инвентаря, в котором должны быть патроны для распределения | Name of inventory for ammo sorting
-		//int ShootTime = 1; // Время стрельбы (в минутах) | Time of shooting (in minutes)
+		// Чтобы скрипт работал как нужно: 
+		// 1) Поставьте контейнер(ванильный), подключенный к общей системе конвееров
+		// 2) Назовите его также, как установлено в переменной "AmmoInventory"
+		// 3) Установите требуемое время стрельбы в переменной "ShootTime" (формула для распределения Темп стрельбы * ShootTime)
+		// 4) Положите в контейнер максимальное (скрипт не дозаряжает пушки в случае нехватки боеприпасов) количество подходящих боеприпасов (Gatling ammo box, 300mm HE Shells и т.д.)
+		// 5) Запустите скрипт
+		// Скрипт продолжит работу в фоновом режиме. Отключите програмный блок чтобы выключить скрипт.
+
+		string AmmoInventory = "[Cargo-Ammo]"; // Название инвентаря, в котором должны быть патроны для распределения
+		int ShootTime = 2; // Время стрельбы (в минутах)
 
 
-		public class YoGun // yo mama
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		// NO EDIT BELOW.
+		// OR ELSE I WILL NUKE PAKISTANIAN REBELS.
+
+
+
+		
+
+
+
+
+		List<IMyConveyorSorter> Archer = new List<IMyConveyorSorter>(); 
+		List<IMyTerminalBlock> Gatling = new List<IMyTerminalBlock>(); 
+		List<IMyConveyorSorter> Crossbow = new List<IMyConveyorSorter>();
+		List<IMyConveyorSorter> Longbow = new List<IMyConveyorSorter>();
+		List<IMyConveyorSorter> Ballista = new List<IMyConveyorSorter>();
+		List<IMyConveyorSorter> Elephant = new List<IMyConveyorSorter>();
+		List<IMyConveyorSorter> Rhino = new List<IMyConveyorSorter>();
+		List<IMyConveyorSorter> Mammoth = new List<IMyConveyorSorter>();
+		List<IMyConveyorSorter> Mastadon = new List<IMyConveyorSorter>();
+		List<IMyConveyorSorter> CIWS = new List<IMyConveyorSorter>();
+		List<IMyConveyorSorter> FLAK = new List<IMyConveyorSorter>();
+		List<IMyTerminalBlock> Artillery = new List<IMyTerminalBlock>();		
+
+		private void Unload()
 		{
-			public string Name = "", Id = "";
-			public int Count = 0;
+			// ¯\_(:3)_/¯
+		}
+
+		public void SetTurrets()
+		{
+			GridTerminalSystem.GetBlocksOfType(Archer, a => a.BlockDefinition.SubtypeId.Equals("Series300SingleBarrel"));
+			GridTerminalSystem.GetBlocksOfType(Longbow, a => a.BlockDefinition.SubtypeId.Equals("Series300DoubleBarrel"));
+			GridTerminalSystem.GetBlocksOfType(Ballista, a => a.BlockDefinition.SubtypeId.Equals("Series300TripleBarrel"));
+			GridTerminalSystem.GetBlocksOfType(Rhino, a => a.BlockDefinition.SubtypeId.Equals("Series900SingleBarrel"));
+			GridTerminalSystem.GetBlocksOfType(Mammoth, a => a.BlockDefinition.SubtypeId.Equals("Series900DoubleBarrel"));
+			GridTerminalSystem.GetBlocksOfType(Mastadon, a => a.BlockDefinition.SubtypeId.Equals("Series900TripleBarrel"));
+			GridTerminalSystem.GetBlocksOfType(CIWS, a => a.BlockDefinition.SubtypeId.Equals("CIWS"));
+			GridTerminalSystem.GetBlocksOfType(FLAK, a => a.BlockDefinition.SubtypeId.Equals("Bofors"));
+			GridTerminalSystem.GetBlocksOfType(Crossbow, a => a.BlockDefinition.SubtypeId.Equals("Series300SideCannon"));
+			GridTerminalSystem.GetBlocksOfType(Elephant, a => a.BlockDefinition.SubtypeId.Equals("Series900SideCannon"));
+			GridTerminalSystem.GetBlocksOfType<IMyLargeGatlingTurret>(Gatling);
+			GridTerminalSystem.GetBlocksOfType<IMyLargeMissileTurret>(Artillery);
+
+
+		}
+
+		public void SetAmmo()
+		{
+			MoveAmmo(Gatling, 4);
+			MoveAmmo(Artillery, 10);
+
+			MoveAmmoWC(Crossbow, 13);
+			MoveAmmoWC(Archer, 13);
+			MoveAmmoWC(Longbow, 25);
+			MoveAmmoWC(Ballista, 35);
+
+			MoveAmmoWC(Rhino, 9);
+			MoveAmmoWC(Mammoth, 17);
+			MoveAmmoWC(Mastadon, 20);
+			MoveAmmoWC(Elephant, 9);
+
+			MoveAmmoWC(CIWS, 2);
+			MoveAmmoWC(FLAK, 12);
+
 		}
 
 
-		private void GetTurrets()
+
+
+		private void MoveAmmoWC(List<IMyConveyorSorter> GunList, int RoF)
 		{
-			List<IMyLargeGatlingTurret> Gats = new List<IMyLargeGatlingTurret>();
-			List<IMyLargeMissileTurret> Arts = new List<IMyLargeMissileTurret>();
+			int CumLoad = RoF * ShootTime;
 
-
-
-			GridTerminalSystem.GetBlocksOfType(Gats);
-			GridTerminalSystem.GetBlocksOfType(Arts, block => !block.CubeGrid.IsSameConstructAs(Me.CubeGrid));
-			
-			foreach(var b in Gats)
+			foreach (var b in GunList)
 			{
-				MoveAmmo(b.GetInventory());
+				var inventory = b.GetInventory();
+				if (inventory.GetItemAt(0) != null) continue;
+				{ MoveInventory(inventory, CumLoad); }
 			}
-
-
 		}
 
-		private void MoveAmmo(IMyInventory dest)
+		private void MoveAmmo(List<IMyTerminalBlock> GunList, int RoF)
+		{
+			int CumLoad = RoF * ShootTime ;
+
+			foreach (var b in GunList)
+			{
+				var inventory = b.GetInventory();
+				if (inventory.GetItemAt(0) != null) continue;
+				{ MoveInventory(inventory, CumLoad); }
+
+			}
+		}
+
+		private void MoveInventory(IMyInventory dest, int amount)
 		{
 			var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
+			var src = Container.GetInventory();
 
-			MoveInventory(Container.GetInventory(), dest);
-		}
-
-		private void MoveInventory(IMyInventory src, IMyInventory dest)
-		{
 			for (int i = 0; i < src.ItemCount; i++)
 			{
 				var item = src.GetItemAt(i);
 				if (!item.HasValue) continue;
-				// the destination actually has space...
 				if (dest.CanItemsBeAdded(item.Value.Amount, item.Value.Type))
 				{
-					src.TransferItemTo(dest, item.Value, null);
+					src.TransferItemTo(dest, item.Value, amount);
 				}
 			}
 		}
 
-		private void Main()
+		private void Main(string args)
 		{
 			Runtime.UpdateFrequency = UpdateFrequency.Update100;
+			SetTurrets();
+			SetAmmo();
 
-
-			// name, rate of fire
-			var Gun = new Dictionary<string, int>
-			{
-				{ "300-1", 13 },
-				{ "300-2", 25 },
-				{ "300-3", 35 },
-				{ "900-1", 9 },
-				{ "900-2", 17 },
-				{ "900-3", 25 },
-				{ "quad", 12 },
-				{ "arty", 10 },
-				{ "gatly", 4 }
-			};
-
-			// Echo("LCD: " LCDstate +); // доделать интерфейс внутри самого блока 
-
-			GetTurrets();
-
+			Echo("Done");
+			if (args == "Unload") { Unload(); } // bro this is most complicated line ever
 
 
 		}
+
+		 // ...UNICODE1...
 
 	}
 }
