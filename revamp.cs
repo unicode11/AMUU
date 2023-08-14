@@ -176,7 +176,7 @@ namespace dolboeb
 
 			MoveAmmoWC(Rhino, 9);
 			MoveAmmoWC(Mammoth, 17);
-			MoveAmmoWC(Mastadon, 20);
+			MoveAmmoWC(Mastadon, 25);
 			MoveAmmoWC(Elephant, 9);
 
 			MoveAmmoWC(CIWS, 2);
