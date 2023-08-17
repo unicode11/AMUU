@@ -27,6 +27,8 @@ using Sandbox.Game.Weapons;
 using System.ComponentModel;
 using System.Net;
 using Sandbox.Definitions;
+using EmptyKeys.UserInterface.Generated.DataTemplatesContractsDataGrid_Bindings;
+using Sandbox.Game.Weapons.Guns;
 //using Sandbox.ModAPI;
 //using SpaceEngineers.Game.ModAPI.Ingame;
 
@@ -35,76 +37,97 @@ namespace dolboeb
 	public class MyClass : MyGridProgram
 	{
 
-		// идея следующая - патроны кладутся в оперделенный ящик
-		// задается параметр "время стрельбы (в минутах)"
-		// патроны распределяются по кораблям 
-		// 2 лсд, на одном сколько пушек, на втором обнаруженные гриды
-		// может быть добавить кнопочную панель чтобы включать распределение? -боже чтоже ты натворил еблан
+        // Идея с возможностью незаполнять setammo
+        // Создаётся класс пушки в котором есть инфа о том ConveyorSorter ли он или TerminalBlock
+        // Через стейтмент if определяем MoveAmmoWC или MoveAmmo
+        // Как пройтись через все классы я правда еще не придумал (foreach class in program?)
 
-		//          ⠀⠀⡰⠀⠀⠀⠀⠀⠀⠀⠢⡀⠀⠀⠀⢫⠙⠲⢤⣀⠀⠀⠀⠀⠀⠀⢀⡔⠀⠀⠀⠀⠀⢆⠀⠀⠀⠀⠀
-		//          ⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠙⣄⠀⠀⠘⡆⠀⠀⠉⠛⢦⣀⠀⠀⣰⠋⠀⠀⠀⠀⠀⠀⠸⡄⠀⠀⠀⠀
-		//          ⠀⢠⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢦⠀⠀⣸⠀⠀⠀⠀⠀⠉⠓⢦⡇⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀
-		//          ⠀⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⠗⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⢿⠀⠀⠀⠀
-		//          ⠀⢸⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀
-		//          ⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⠀⠀⠀⠀
-		//          ⠀⠀⢧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀
-		//          ⠀⠀⠸⡀⠀⠀⠀⠀⠘⠦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡴⠋⠀⠀⠀⠀⢸⠁⠀⠀⠀⠀
-		//          ⠀⠀⠀⢣⠀⠀⠀⠀⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠞⠉⠀⠀⠀⠀⠀⠀⢎⣀⣀⣀⣀⠀
-		//          ⢯⡉⠙⠒⠒⠀⠀⠀⠀⠀⠀⠀⠈⣙⡦⠀⠀⠀⠀⠀⠀⠀⢰⣞⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡴⠃
-		//          ⠀⠙⢦⡀⠀⠀⠀⠀⠀⣀⡤⠖⠋⠁⠀⠀⠀⢀⣀⠀⠀⠀⠀⠈⠙⠳⢦⣄⡀⠀⠀⠀⠀⠀⢠⠞⠁⠀⠀
-		//          ⠀⠀⠈⢳⠀⠀⠀⠀⠈⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠁⠀⠀⠀⠀⠀⢻⡀⠀⠀⠀
-		//          ⠀⠀⢀⡞⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⣆⠀⠀
-		//          ⠀⠀⠾⡤⣤⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠐⠉⠉⠳⠶⠋⠀⠀⠀⠀⠀⠀⠀⢀⣠⠆⠀⠤⠤⠴⠶⠋⠀⠀
-		//          ⠀⠀⠀⠀⠀⠀⠀⠈⠉⢻⡲⠦⣤⣀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠤⠖⠚⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-		//          ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠳⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-		//          ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣳⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-		//          ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⣁⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀
-		//          ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⢩⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⡄⠀⠀⠀⠀⠀⠀⠀⠀
-		//          ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣧⠀⠀⠀⠀⠀⠀⠀⠀
-		//          ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+        // Может еще добавить типа IgnoreTag? Чтобы в оперделенные пушки оно не сувало патроны
+        // Этот игнортэг надо в кустом дату сувать
 
+        // Добавить "помощника" который будет по ошибкам говорить че не так
 
-		// --- прогрессия сумашествия
+        // Добавить систему дозаряжания
 
-		// короче главная проблема с которой я столкнулся (пока что) это проблема переноса предметво между инвентарями
-		// хаха муха в супе
-		// я съел две пачки фенибута убиваю себя под нирвану
-		// выше я написал(напевал) текст песни, сейчас я походу реально иду за таблетками. код выводит меня блять
-		// CERF RNJ LFK T,EXTQ FHNBKKTHBQCRJQ NEHTKB YFPDFYBT MISSILELARGETURRET RFRJQ YF[EQ VBCCFQKS LJK,J`,S
-		// сука оно мне снится 
-		// кулл стори - когда я жил в двух-этажном доме, то ночью ровно после 11 у меня был принцип не выходить из комнаты потому что это моя сейфзона в которой никто меня не тронет
-		// Я НЕНАВИЖУ БЛЯТЬ ЭТУ ИГРУ ЭТОТ СКРИПТ ЭТИ ПЛАГИНЫ НАХУЯ Я ВООБЩЕ ЧТО-ТО ДЕЛАЮ РАДИ КОГО ТО БЛЯТЬ УБЕЙТЕ МЕНЯ НАХУЙ Я НЕНАВИЖУ СВОЮ ЖИЗНЬ НЕНАВИЖУ ВСЕХ КИНЫ ТУПОРЫЛЫЕ УЕБАНЫ НЕ УМЕЮТ НИХУЯ АБСОЛЮТНО ДЕЛАТЬ В ЭТОЙ ИГРЕ ДИГЛО ВРЕЙЖ ИДИОТСКОЕ ТУПОЕ ГОВНО БЛЯТЬ ХУЕТА ПОЛНАЯ КИНЫ ИДИТЕ НАХУЙ ВСЕ ИДИТЕ НАХУЙ
-		// ХАХАХАХАХАХАХАХХАХАХАХАХХАХАХАХААХ ОНО У МЕНЯ В СТЕНАХ ХАХАХАХА
+        // непонятно еще как быть с AP патронами
 
-		// --- конец стенки
-
-
-		// код проходит две(три(3)) стадии: 1-сделать его рабочим, 2-сделать его удобным, 3-автоматизировать
-
-		// формула = (Кол-во патронов X Время стрельбы)/Кол-во пушек
-		// возможно кол-во патронов не нужно? и тогда будет Время стрельбы x rate of fire
-
-		// ИНВЕНТАРЬ НЕ ПЕРЕДАЕТ ЕСЛИ ОН ПЕРЕЗАПОЛНЯЕТ
-
-		// ^ удалить до публикации
-
-
-		// ...UNICODE1...
-
-		// Чтобы скрипт работал как нужно: 
-		// 1) Поставьте контейнер(ванильный), подключенный к общей системе конвееров
-		// 2) Назовите его также, как установлено в переменной "AmmoInventory"
-		// 3) Установите требуемое время стрельбы в переменной "ShootTime" (формула для распределения Темп стрельбы * ShootTime)
-		// 4) Положите в контейнер максимальное (скрипт не дозаряжает пушки в случае нехватки боеприпасов) количество подходящих боеприпасов (Gatling ammo box, 300mm HE Shells и т.д.)
-		// 5) Запустите скрипт
-		// Скрипт продолжит работу в фоновом режиме. Отключите програмный блок чтобы выключить скрипт.
-
-		string AmmoInventory = "[Cargo-Ammo]"; // Название инвентаря, в котором должны быть патроны для распределения
-		int ShootTime = 2; // Время стрельбы (в минутах)
+        // Сделать найстройки в CustomData пб, а не в скрипте, иначе неудобно
 
 
 
 
+        //MyGun CROSSBOW = new MyGun();
+        //MyGun ARCHER = new MyGun();
+        //MyGun LONGBOW = new MyGun();
+        //MyGun BALLSLISTA = new MyGun();
+
+        //MyGun ELEPHANT = new MyGun();
+        //MyGun RHINO = new MyGun();
+        //MyGun MAMMOTH = new MyGun();
+        //MyGun MASTODON = new MyGun();
+
+        //MyGun CIWS = new MyGun();
+        //MyGun FLAK = new MyGun();
+        //MyGun HEAVYMINIGUN = new MyGun();
+
+        //public void YoptaGun()
+        //{
+        //	// 300-s
+        //	CROSSBOW.Name = "Crossbow"; 
+        //	CROSSBOW.Id = "Series300SideCannon";
+        //	CROSSBOW.RoF = ARCHER.RoF;
+
+        //	ARCHER.Name = "Archer";
+        //	ARCHER.Id = "Series300SingleBarrel";
+        //	ARCHER.RoF = 13;
+
+        //	LONGBOW.Name = "Longbow";
+        //	LONGBOW.Id = "Series300DoubleBarrel";
+        //	LONGBOW.RoF = 25;
+
+        //	BALLSLISTA.Name = "Ballista";
+        //	BALLSLISTA.Id = "Series300TrippleBarrel";
+        //	BALLSLISTA.RoF = 35;
+
+
+        //	//900-s
+        //	ELEPHANT.Name = "Elephant";
+        //	ELEPHANT.Id = "Series900SideCannon";
+        //	ELEPHANT.RoF = RHINO.RoF;
+
+        //	RHINO.Name = "Rhino";
+        //	RHINO.Id = "Series900SingleBarrel";
+        //	RHINO.RoF = 9;
+
+        //	MAMMOTH.Name = "Mammoth";
+        //	MAMMOTH.Id = "Series900DoubleBarrel";
+        //	MAMMOTH.RoF = 17;
+
+        //	MASTODON.Name = "Mastodon";
+        //	MASTODON.Id = "Series900TrippleBarrel";
+        //	MASTODON.RoF = 25;
+
+
+        //	// Other weps
+        //	CIWS.Name = "CIWS";
+        //	CIWS.Id = "CIWS";
+        //	CIWS.RoF = 2;
+
+        //	FLAK.Name = "Quad";
+        //	FLAK.Id = "Bofors";
+        //	FLAK.RoF = 12;
+
+        //	HEAVYMINIGUN.Name = "Heavy Gatling Fun";
+        //          HEAVYMINIGUN.Id = "Vulcan";
+        //          HEAVYMINIGUN.RoF = 8;
+
+        //internal class MyGun
+        //{
+        //	public string Name = "", Id = ""; // Name of the gun, SubID of block, Existing list
+        //	public int RoF = 0; // Rate of fire
+        //}
+
+        //}
 
 
 
@@ -115,6 +138,27 @@ namespace dolboeb
 
 
 
+
+        //пд, хевиГатлинг, квад, 900, 300, цивс, артилерия, рокет лаунчер
+
+        // ...UNICODE1...
+
+        // Скрипт распределяет боеприпасы по всем орудиям из заданного контейнера
+
+
+        // Чтобы скрипт работал как нужно: 
+        // 1) Поставьте контейнер, подключенный к общей системе конвееров
+        // 2) Назовите его также, как установлено в переменной "AmmoInventory"
+        // 3) Установите требуемое время стрельбы в переменной "ShootTime" (формула для распределения - Темп стрельбы * ShootTime)
+        // 4) Положите в контейнер подходящие боеприпасы (Gatling ammo box, 300mm HE Shells и т.д.)
+        // 5) Запустите скрипт
+        // Скрипт продолжит работу в фоновом режиме. Отключите програмный блок чтобы выключить скрипт.
+
+
+
+        string AmmoInventory = "[Cargo-Ammo]"; // Название инвентаря, в котором должны быть патроны для распределения
+		int ShootTime = 1; // Время стрельбы (в минутах)
+		//string TagAP = "AP"; // Тег для определения в какие пушки должны поступать AP снаряды
 
 
 
@@ -122,14 +166,11 @@ namespace dolboeb
 		// OR ELSE I WILL NUKE PAKISTANIAN REBELS.
 
 
+		List<IMyTerminalBlock> Gatling = new List<IMyTerminalBlock>();
+		List<IMyTerminalBlock> RocketLauncher = new List<IMyTerminalBlock>();
+		List<IMyTerminalBlock> Artillery = new List<IMyTerminalBlock>();
 
-		
-
-
-
-
-		List<IMyConveyorSorter> Archer = new List<IMyConveyorSorter>(); 
-		List<IMyTerminalBlock> Gatling = new List<IMyTerminalBlock>(); 
+		List<IMyConveyorSorter> Archer = new List<IMyConveyorSorter>();
 		List<IMyConveyorSorter> Crossbow = new List<IMyConveyorSorter>();
 		List<IMyConveyorSorter> Longbow = new List<IMyConveyorSorter>();
 		List<IMyConveyorSorter> Ballista = new List<IMyConveyorSorter>();
@@ -137,14 +178,14 @@ namespace dolboeb
 		List<IMyConveyorSorter> Rhino = new List<IMyConveyorSorter>();
 		List<IMyConveyorSorter> Mammoth = new List<IMyConveyorSorter>();
 		List<IMyConveyorSorter> Mastadon = new List<IMyConveyorSorter>();
-		List<IMyConveyorSorter> CIWS = new List<IMyConveyorSorter>();
-		List<IMyConveyorSorter> FLAK = new List<IMyConveyorSorter>();
-		List<IMyTerminalBlock> Artillery = new List<IMyTerminalBlock>();		
+		List<IMyConveyorSorter> Ciws = new List<IMyConveyorSorter>(); 
+		List<IMyConveyorSorter> Flak = new List<IMyConveyorSorter>(); // quad
+		List<IMyConveyorSorter> Minihuy = new List<IMyConveyorSorter>();
 
-		private void Unload()
-		{
-			// ¯\_(:3)_/¯
-		}
+
+
+		// Can items be transfered to certain inventory
+
 
 		public void SetTurrets()
 		{
@@ -154,65 +195,59 @@ namespace dolboeb
 			GridTerminalSystem.GetBlocksOfType(Rhino, a => a.BlockDefinition.SubtypeId.Equals("Series900SingleBarrel"));
 			GridTerminalSystem.GetBlocksOfType(Mammoth, a => a.BlockDefinition.SubtypeId.Equals("Series900DoubleBarrel"));
 			GridTerminalSystem.GetBlocksOfType(Mastadon, a => a.BlockDefinition.SubtypeId.Equals("Series900TripleBarrel"));
-			GridTerminalSystem.GetBlocksOfType(CIWS, a => a.BlockDefinition.SubtypeId.Equals("CIWS"));
-			GridTerminalSystem.GetBlocksOfType(FLAK, a => a.BlockDefinition.SubtypeId.Equals("Bofors"));
+			GridTerminalSystem.GetBlocksOfType(Ciws, a => a.BlockDefinition.SubtypeId.Equals("CIWS"));
+			GridTerminalSystem.GetBlocksOfType(Flak, a => a.BlockDefinition.SubtypeId.Equals("Bofors"));
+			GridTerminalSystem.GetBlocksOfType(Minihuy, a => a.BlockDefinition.SubtypeId.Equals("Vulcan"));
 			GridTerminalSystem.GetBlocksOfType(Crossbow, a => a.BlockDefinition.SubtypeId.Equals("Series300SideCannon"));
 			GridTerminalSystem.GetBlocksOfType(Elephant, a => a.BlockDefinition.SubtypeId.Equals("Series900SideCannon"));
 			GridTerminalSystem.GetBlocksOfType<IMyLargeGatlingTurret>(Gatling);
 			GridTerminalSystem.GetBlocksOfType<IMyLargeMissileTurret>(Artillery);
-
-
 		}
+
 
 		public void SetAmmo()
 		{
 			MoveAmmo(Gatling, 4);
 			MoveAmmo(Artillery, 10);
 
-			MoveAmmoWC(Crossbow, 13);
-			MoveAmmoWC(Archer, 13);
-			MoveAmmoWC(Longbow, 25);
-			MoveAmmoWC(Ballista, 35);
+			MoveAmmo(Crossbow, 13);
+			MoveAmmo(Archer, 13);
+			MoveAmmo(Longbow, 25);
+			MoveAmmo(Ballista, 35);
 
-			MoveAmmoWC(Rhino, 9);
-			MoveAmmoWC(Mammoth, 17);
-			MoveAmmoWC(Mastadon, 25);
-			MoveAmmoWC(Elephant, 9);
+			MoveAmmo(Rhino, 9);
+			MoveAmmo(Mammoth, 17);
+			MoveAmmo(Mastadon, 25);
+			MoveAmmo(Elephant, 9);
 
-			MoveAmmoWC(CIWS, 2);
-			MoveAmmoWC(FLAK, 12);
-
+			MoveAmmo(Ciws, 2);
+			MoveAmmo(Flak, 12);
+			MoveAmmo(Minihuy, 4);
 		}
 
 
-
-
-		private void MoveAmmoWC(List<IMyConveyorSorter> GunList, int RoF)
+		private void MoveAmmo(IList GunList, int RoF)
 		{
-			int CumLoad = RoF * ShootTime;
+			MyFixedPoint CumLoad = (RoF * ShootTime);
 
-			foreach (var b in GunList)
+			foreach (IMyEntity b in GunList)
 			{
 				var inventory = b.GetInventory();
-				if (inventory.GetItemAt(0) != null) continue;
-				{ MoveInventory(inventory, CumLoad); }
+				var slut = inventory.GetItemAt(0);
+
+				if (!slut.HasValue) 
+				{ 
+					MoveInventory(inventory, (int)CumLoad); 
+				}
+				else if (!slut.Value.Amount.Equals(CumLoad))
+				{
+					MoveInventory(inventory, (int)CumLoad - (int)slut.Value.Amount);
+					continue;
+				}
 			}
 		}
 
-		private void MoveAmmo(List<IMyTerminalBlock> GunList, int RoF)
-		{
-			int CumLoad = RoF * ShootTime ;
-
-			foreach (var b in GunList)
-			{
-				var inventory = b.GetInventory();
-				if (inventory.GetItemAt(0) != null) continue;
-				{ MoveInventory(inventory, CumLoad); }
-
-			}
-		}
-
-		private void MoveInventory(IMyInventory dest, int amount)
+        private void MoveInventory(IMyInventory dest, int amount)
 		{
 			var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
 			var src = Container.GetInventory();
@@ -221,23 +256,37 @@ namespace dolboeb
 			{
 				var item = src.GetItemAt(i);
 				if (!item.HasValue) continue;
-				if (dest.CanItemsBeAdded(item.Value.Amount, item.Value.Type))
-				{
-					src.TransferItemTo(dest, item.Value, amount);
-				}
+				src.TransferItemTo(dest, item.Value, amount);
 			}
 		}
+		
 
-		private void Main(string args)
+		private void Unload() // eh doesn't work at the time < 16.08.23
+		{
+			// do things
+		}
+
+		internal void Console(object message)
+		{
+			Echo(Convert.ToString(message));
+		}
+
+		internal void SetConfigurator()
+		{
+            Me.CustomData = "ABC";
+        }
+
+		public void Main(string args)
 		{
 			Runtime.UpdateFrequency = UpdateFrequency.Update100;
 			SetTurrets();
 			SetAmmo();
+			SetConfigurator();
 
-			Echo("Done");
-			if (args == "Unload") { Unload(); } // bro this is most complicated line ever
+			Console("RUNNING SCRIPT");
+			if (args == "Unload") { Unload(); Console("Unloaded all guns for you, senpai..."); }
 
-
+			// Прямо сейчас я думаю, что карты таро будут стабильней чем мой скрипт
 		}
 
 		 // ...UNICODE1...

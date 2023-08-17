@@ -1,0 +1,5 @@
+D:\0Папки\Работа\AMUU\obj\x64\Debug\net6.0\AMUU.csproj.AssemblyReference.cache
+D:\0Папки\Работа\AMUU\obj\x64\Debug\net6.0\AMUU.GeneratedMSBuildEditorConfig.editorconfig
+D:\0Папки\Работа\AMUU\obj\x64\Debug\net6.0\AMUU.AssemblyInfoInputs.cache
+D:\0Папки\Работа\AMUU\obj\x64\Debug\net6.0\AMUU.AssemblyInfo.cs
+D:\0Папки\Работа\AMUU\obj\x64\Debug\net6.0\AMUU.csproj.CoreCompileInputs.cache
