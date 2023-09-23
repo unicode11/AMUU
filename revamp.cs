@@ -4,6 +4,7 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using VRageMath;
 using VRage.Game;
 using Sandbox.ModAPI.Interfaces;
@@ -30,23 +31,14 @@ using Sandbox.Definitions;
 using Sandbox.Game.Weapons.Guns;
 //using Sandbox.ModAPI;
 //using SpaceEngineers.Game.ModAPI.Ingame;
-
 namespace dolboeb
 {
 	public class MyClass : MyGridProgram
 	{
-
-		// Может еще добавить типа IgnoreTag? Чтобы в оперделенные пушки оно не сувало патроны
-		// Этот игнортэг надо в кустом дату сувать
-
-		// !Скорее всего лаги происходят из-за того что скрипт пытается тупо каждый предмет засунуть в пушку, пока не найдёт нужный
-		// !РЕШИТЬ
-
-		// непонятно еще как быть с AP патронами
-		// Возможно стоит сделать определение "есть ли в названии слово AP или его аналоги (буквально есть стринг "TagAP")
-		// И дальше в этот определенный блок дать возможность сувать только патроны AP
-
 		// TODO Сделать найстройки в CustomData пб, а не в скрипте, иначе неудобно
+
+		// TODO Сделать один большой универсальный список пушек
+		// * Чтобы не ебаться и постоянно новый список под каждый ствол не добавлять
 		
 
 
@@ -61,14 +53,16 @@ namespace dolboeb
 // 2) Назовите его также, как установлено в переменной "AmmoInventory"
 // 3) Установите требуемое время стрельбы в переменной "ShootTime" (формула для распределения - Темп стрельбы * ShootTime)
 // 4) Положите в контейнер подходящие боеприпасы (Gatling ammo box, 300mm HE Shells и т.д.)
-// 5) Запустите скрипт
+// 5) Запустите скрипт кнопкой Run
 // Скрипт продолжит работу в фоновом режиме. Отключите програмный блок чтобы выключить скрипт.
+// При стыковании нового корабля с базой следует снова запустить скрипт кнопкой Run, чтобы новые орудия добавились в список.
 
 
 
-string AmmoInventory = "[Cargo-Ammo]"; // Название инвентаря, в котором должны быть патроны для распределения
-int ShootTime = 1; // Время стрельбы (в минутах)
-//string TagAP = "AP"; // Тег для определения в какие пушки должны поступать AP снаряды
+string AmmoInventory = "[Cargo-Ammo]"; // Название инвентаря, в котором должны быть патроны для распределения (Станд. - [Cargo-Ammo])
+string APtag = "[AP]"; // Тег для разметки орудий, использующих AP боеприпасы. Нужно вписать в название орудия. (Станд. - [AP]) 
+int ShootTime = 1; // Время стрельбы (в минутах) (Станд. - 1)
+bool Delay = true; // Исскуственная задержка на 3 секунды, нужная для оптимизации. Может быть отключена, установив значение false (Станд. - true)
 
 
 
@@ -96,7 +90,6 @@ List<IMyConveyorSorter> Ciws = new List<IMyConveyorSorter>();
 List<IMyConveyorSorter> Flak = new List<IMyConveyorSorter>(); // quad
 List<IMyConveyorSorter> Cannonsentry = new List<IMyConveyorSorter>();
 List<IMyConveyorSorter> Minihuy = new List<IMyConveyorSorter>();
-
 
 public void SetTurrets()
 {
@@ -144,24 +137,30 @@ private void MoveAmmo(IList GunList, int RoF)
 {
 	MyFixedPoint CumLoad = (RoF * ShootTime);
 
-	foreach (IMyCubeBlock b in GunList)
+	foreach (IMyFunctionalBlock b in GunList)
 	{
 		var inventory = b.GetInventory();
-		var slut = inventory.GetItemAt(0);
+		var slut = inventory.GetItemAt(0); 
 
 		if (!slut.HasValue) 
 		{ 
-			MoveInventory(inventory, (int)CumLoad);
+			if(!b.CustomName.Contains(APtag)){
+				LoadAmmo(inventory, (int)CumLoad);}
+			else{
+				LoadAP(inventory, (int)CumLoad);}
 		}
 		else if (!slut.Value.Amount.Equals(CumLoad))
 		{
-			MoveInventory(inventory, (int)CumLoad - (int)slut.Value.Amount);
+			if(!b.CustomName.Contains(APtag)){
+				LoadAmmo(inventory, (int)CumLoad - (int)slut.Value.Amount);}
+			else{
+				LoadAP(inventory, (int)CumLoad - (int)slut.Value.Amount);}
 		}
 	continue;
 	}
 }
 
-private void MoveInventory(IMyInventory dest, int amount)
+public void LoadAmmo(IMyInventory dest, int amount)
 {
 var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
 var src = Container.GetInventory();
@@ -170,18 +169,25 @@ for (int i = 0; i < src.ItemCount; i++)
 {
 	var item = src.GetItemAt(i);
 	if (!item.HasValue) continue;
-	if (IsAmmo(item)){
+	if (item.Value.Type.TypeId.Equals("MyObjectBuilder_AmmoMagazine") & 
+		!item.Value.Type.SubtypeId.Contains("AP")){ // to check if item is actually an ammo before trying to put it into container
 		src.TransferItemTo(dest, item.Value, amount);
 	}
 }
+
 }
 
-public bool IsAmmo(MyInventoryItem? cum)
+public void LoadAP(IMyInventory dest, int amount)
 {
-	if (cum.HasValue && cum.Value.Type.TypeId.Equals("MyObjectBuilder_AmmoMagazine") )
-		{return true;}
-	else	
-		{return false;}
+	var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
+	var src = Container.GetInventory();
+
+	var AP9item = src.FindItem(MyItemType.MakeAmmo("Series900MagazineAP"));
+	var AP3item = src.FindItem(MyItemType.MakeAmmo("Series300MagazineAP"));
+	if  (AP9item.HasValue && AP3item.HasValue){
+			src.TransferItemTo(dest, (MyInventoryItem)AP9item, amount);
+			src.TransferItemTo(dest, (MyInventoryItem)AP3item, amount);
+		}
 }
 
 public void SetConfigurator()
@@ -194,18 +200,21 @@ internal void Console(object message)
 
 public void Main(string args)
 {
-Console
+	Console
 	(
- 	$"SHOOT TIME: {ShootTime}\n\n" + 
- 	"Available ammo:\n" +
- 	$"900 = | HE- | AP- |\n" + // вот тут добавить список доступных ХЕ и АП
- 	$"300 = | HE- | AP- |\n" + // ^^^
- 	$"CIWS =\n" +
- 	$"Artillery =\n" +
- 	$"Cannon Sentry =\n"
+		"Sowwy, doesn't work rn /shrug\n\n" +
+		$"SHOOT TIME: {ShootTime}\n" +
+		$"DELAY: {Delay}\n" + 
+		"\n" +
+		"Available ammo:\n" +
+		$"900 = | HE-0 | AP-0 |\n" + // вот тут добавить список доступных ХЕ и АП
+		$"300 = | HE-0 | AP-0 |\n"   // ^^^
+		// $"CIWS =\n" +
+		// $"Artillery =\n" +
+		// $"Cannon Sentry =\n"
 	);
 
-SetAmmo();
+	SetAmmo();
 }
 
 public void Save()
@@ -215,9 +224,9 @@ public void Save()
 
 public void Program() 
 {
-Runtime.UpdateFrequency = UpdateFrequency.Update100;
-SetConfigurator();
-SetTurrets();
+	Runtime.UpdateFrequency = UpdateFrequency.Update100;
+	SetConfigurator();
+	SetTurrets();
 }
 
 
