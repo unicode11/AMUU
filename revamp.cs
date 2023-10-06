@@ -147,14 +147,14 @@ private void MoveAmmo(IList GunList, int RoF)
 			if(!b.CustomName.Contains(APtag)){
 				LoadAmmo(inventory, (int)CumLoad);}
 			else{
-				LoadAP(inventory, (int)CumLoad);}
+				LoadAmmoAP(inventory, (int)CumLoad);}
 		}
 		else if (!slut.Value.Amount.Equals(CumLoad))
 		{
 			if(!b.CustomName.Contains(APtag)){
 				LoadAmmo(inventory, (int)CumLoad - (int)slut.Value.Amount);}
 			else{
-				LoadAP(inventory, (int)CumLoad - (int)slut.Value.Amount);}
+				LoadAmmoAP(inventory, (int)CumLoad - (int)slut.Value.Amount);}
 		}
 	continue;
 	}
@@ -162,22 +162,22 @@ private void MoveAmmo(IList GunList, int RoF)
 
 public void LoadAmmo(IMyInventory dest, int amount)
 {
-var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
-var src = Container.GetInventory();
+	var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
+	var src = Container.GetInventory();
 
-for (int i = 0; i < src.ItemCount; i++)
-{
-	var item = src.GetItemAt(i);
-	if (!item.HasValue) continue;
-	if (item.Value.Type.TypeId.Equals("MyObjectBuilder_AmmoMagazine") & 
-		!item.Value.Type.SubtypeId.Contains("AP")){ // to check if item is actually an ammo before trying to put it into container
-		src.TransferItemTo(dest, item.Value, amount);
+	for (int i = 0; i < src.ItemCount; i++)
+	{
+		var item = src.GetItemAt(i);
+		if (!item.HasValue) continue;
+		if (item.Value.Type.TypeId.Equals("MyObjectBuilder_AmmoMagazine") & 
+			!item.Value.Type.SubtypeId.Contains("AP")){ // to check if item is actually an ammo before trying to put it into container
+			src.TransferItemTo(dest, item.Value, amount);
+		}
 	}
-}
 
 }
 
-public void LoadAP(IMyInventory dest, int amount)
+public void LoadAmmoAP(IMyInventory dest, int amount)
 {
 	var Container = (IMyCargoContainer)GridTerminalSystem.GetBlockWithName(AmmoInventory);
 	var src = Container.GetInventory();

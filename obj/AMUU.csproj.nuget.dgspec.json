@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\0Папки\\Работа\\AMUU\\AMUU.csproj": {}
+    "D:\\0Папки\\Работа\\AMUU\\AMUU.csproj": {}
   },
   "projects": {
-    "d:\\0Папки\\Работа\\AMUU\\AMUU.csproj": {
+    "D:\\0Папки\\Работа\\AMUU\\AMUU.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\0Папки\\Работа\\AMUU\\AMUU.csproj",
+        "projectUniqueName": "D:\\0Папки\\Работа\\AMUU\\AMUU.csproj",
         "projectName": "AMUU",
-        "projectPath": "d:\\0Папки\\Работа\\AMUU\\AMUU.csproj",
+        "projectPath": "D:\\0Папки\\Работа\\AMUU\\AMUU.csproj",
         "packagesPath": "C:\\Users\\egora\\.nuget\\packages\\",
-        "outputPath": "d:\\0Папки\\Работа\\AMUU\\obj\\",
+        "outputPath": "D:\\0Папки\\Работа\\AMUU\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "F:\\Visual Studio\\Tools\\NuGetPackages"
